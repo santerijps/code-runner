@@ -3,7 +3,9 @@ package main
 import (
 	"io"
 	"log"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gofiber/contrib/websocket"
@@ -20,9 +22,16 @@ type Client struct {
 
 func main() {
 	app := fiber.New()
-	app.Static("/", "./public")
+	log.Println(getPublicDirPath())
+	app.Static("/", getPublicDirPath())
 	app.Get("/ws", websocket.New(handleWebSocketConnection))
 	app.Listen(":3000")
+}
+
+func getPublicDirPath() string {
+	executablePath, _ := os.Executable()
+	dirPath := filepath.Dir(executablePath)
+	return filepath.Join(dirPath, "public")
 }
 
 func handleWebSocketConnection(c *websocket.Conn) {
