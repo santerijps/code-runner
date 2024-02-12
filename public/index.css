@@ -1,0 +1,25 @@
+* {
+  box-sizing: border-box;
+  min-height: 1;
+}
+
+fieldset {
+  margin: 2rem auto;
+  max-width: 800px;
+  width: 100%;
+}
+
+#code {
+  resize: none;
+  padding: 0.5rem;
+  width: 100%;
+}
+
+#output {
+  background-color: gainsboro;
+  font-size: large;
+  height: 200px;
+  overflow-y: scroll;
+  padding: 0.5rem;
+  white-space: pre-line;
+}
