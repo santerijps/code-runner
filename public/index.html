@@ -1,19 +1,32 @@
+<!DOCTYPE html>
 <html lang="en">
 
   <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <title>code runner</title>
+
+    <!-- Font: Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
+
+    <!-- Terminal emulator: xterm.js -->
+    <script src=" https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js "></script>
+    <link href=" https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css " rel="stylesheet">
+
+    <!-- Local imports -->
     <link rel="stylesheet" href="./index.css">
     <script src="./index.js" defer></script>
+
   </head>
 
   <body>
 
-    <fieldset>
-
+    <!-- <fieldset>
       <legend>code runner</legend>
-
       <p>
         This is a code runner application for compiling and running Odin code.
         <br>
@@ -23,25 +36,68 @@
           <li>Backend: Go + Fiber with WebSockets</li>
         </ul>
       </p>
-
-      <div>
-        <textarea id="code" rows="20" placeholder="write code here"></textarea>
-      </div>
-
+      <div id="code-container"></div>
       <br>
-
-      <form id="button-form">
-        <button name="compile-and-run" type="submit">compile and run</button>
-        <button name="kill-process" type="submit">kill process</button>
-        <input id="stdin" type="text" placeholder="write stdin line">
-        <button name="write-to-stdin" type="submit">write to stdin</button>
-      </form>
-
-      <div>
-        <pre id="output"></pre>
+      <div id="button-container">
+        <button onclick="compileAndRun()">compile and run</button>
+        <button onclick="killProcess()">kill process</button>
       </div>
+      <br>
+      <div id="terminal"></div>
+    </fieldset> -->
 
-    </fieldset>
+    <div id="wrapper">
+      <div id="code-container"></div>
+      <div id="terminal"></div>
+    </div>
+
+    <!-- Text editor: monaco-editor -->
+    <script src="./monaco-editor/dev/vs/loader.js"></script>
+    <script>
+      require.config({ paths: { vs: "monaco-editor/dev/vs" } });
+      require(["vs/editor/editor.main"], function () {
+        const editor = monaco.editor.create(document.getElementById("code-container"), {
+          fontFamily: "'Fira Code', monospace",
+          fontLigatures: true,
+          fontSize: 18,
+          value: `package main
+
+import "core:fmt"
+import "core:time"
+
+main :: proc() {
+  for i in 1 ..= 30 {
+    fmt.println("Hello, Odin!", i)
+    time.sleep(time.Second)
+  }
+}
+`,
+          language: "odin",
+          automaticLayout: true,
+          theme: "vs-dark",
+        });
+        const a1 = editor.addAction({
+          id: "compile-and-run",
+          label: "Compile and run",
+          keybindings: [
+            monaco.KeyMod.WinCtrl | monaco.KeyCode.Enter,
+            monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+          ],
+          run: compileAndRun,
+        });
+        const a2 = editor.addAction({
+          id: "kill-process",
+          label: "Kill process",
+          keybindings: [
+            monaco.KeyMod.WinCtrl | monaco.KeyCode.KeyK,
+            monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
+          ],
+          run: killProcess,
+        });
+        window.editor = editor;
+      });
+
+    </script>
 
   </body>
 

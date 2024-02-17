@@ -1,39 +1,71 @@
 const ws = new WebSocket("ws://" + location.host + "/ws");
-ws.onerror = (event) => console.log("WebSocket ERROR", event);
 
+const terminal = new Terminal({
+  cursorBlink: false,
+  cursorInactiveStyle: "none",
+  fontFamily: "'Fira Code', monospace",
+  rows: 100,
+  cols: 30,
+});
+
+let allowWritingToStdin = false;
+let stdinLine = "";
+
+ws.onopen = () => console.log("WebSocket OPEN");
+ws.onclose = (event) => console.log("WebSocket CLOSE", event.code, event.reason);
+ws.onerror = (event) => console.log("WebSocket ERROR", event);
 ws.onmessage = (event) => {
   const msg = JSON.parse(event.data);
   switch (msg.action) {
     case "program-output":
-      output.innerHTML += msg.output;
-      output.scrollTo(0, output.scrollHeight)
+      terminal.write(msg.output.replace(/\n/g, "\r\n"));
       break;
     case "program-exit-code":
-      output.innerHTML += `\nExit code: ${msg.code}`;
-      output.scrollTo(0, output.scrollHeight)
+      terminal.write(`\r\nExit code: ${msg.code}\r\n`);
+      allowWritingToStdin = false;
       break;
   }
 };
 
-const code = document.getElementById("code");
-const stdin = document.getElementById("stdin");
-const output = document.getElementById("output");
+// code.addEventListener('keydown', ({ctrlKey, key}) => {
+//   if (ctrlKey && key === "Enter") {
+//     compileAndRun();
+//   }
+// });
 
-document.getElementById("button-form").addEventListener("submit", (event) => {
-  event.preventDefault();
-  switch (event.submitter.name) {
-    case "compile-and-run":
-      ws.send(JSON.stringify({action: "compile-and-run", code: code.value}));
-      output.innerHTML = "";
+terminal.open(document.getElementById("terminal"));
+terminal.onKey(({domEvent}) => {
+  switch (domEvent.keyCode) {
+    case 13:
+      if (allowWritingToStdin) {
+        terminal.write("\r\n");
+        writeToStdin();
+      }
       break;
-    case "write-to-stdin":
-      ws.send(JSON.stringify({action: "write-to-stdin", stdin: stdin.value + "\r\n"}));
-      stdin.value = "";
-      output.innerHTML += stdin.value + "\r\n";
-      output.scrollTo(0, output.scrollHeight);
+    case 8:
+      terminal.write("\b \b");
+      stdinLine = stdinLine.substring(0, stdinLine.length - 1);
       break;
-    case "kill-process":
-      ws.send(JSON.stringify({action: "kill-process"}));
-      break;
+    default:
+      if (domEvent.key.length === 1 && allowWritingToStdin) {
+        terminal.write(domEvent.key);
+        stdinLine += domEvent.key;
+      }
   }
 });
+
+function compileAndRun() {
+  ws.send(JSON.stringify({action: "compile-and-run", code: editor.getValue()}));
+  terminal.clear();
+  allowWritingToStdin = true;
+}
+
+function writeToStdin() {
+  ws.send(JSON.stringify({action: "write-to-stdin", stdin: stdinLine + "\r\n"}));
+  stdinLine = "";
+}
+
+function killProcess() {
+  ws.send(JSON.stringify({action: "kill-process"}));
+  allowWritingToStdin = false;
+}

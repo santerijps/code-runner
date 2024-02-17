@@ -1,25 +1,37 @@
 * {
   box-sizing: border-box;
-  min-height: 1;
+}
+
+body {
+  height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
 }
 
 fieldset {
-  margin: 2rem auto;
-  max-width: 800px;
+  margin: auto;
+  max-width: 1000px;
   width: 100%;
 }
 
-#code {
-  resize: none;
-  padding: 0.5rem;
-  width: 100%;
+#wrapper {
+  align-content: stretch;
+  align-items: stretch;
+  display: flex;
+  height: 100%;
 }
 
-#output {
-  background-color: gainsboro;
-  font-size: large;
-  height: 200px;
-  overflow-y: scroll;
+#code-container {
+  height: 100%;
+  width: 60%;
+}
+
+#terminal {
+  height: 100%;
+  overflow-y: hidden;
+  width: 40%;
+}
+
+#terminal > div {
   padding: 0.5rem;
-  white-space: pre-line;
 }

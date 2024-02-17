@@ -1,0 +1,16 @@
+{
+  "name": "code-runner",
+  "version": "1.0.0",
+  "description": "A work in progress.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "monaco-editor": "^0.46.0",
+    "xterm": "^5.3.0"
+  }
+}

@@ -1,3 +1,8 @@
+/*
+	TODO: Should we ignore the process being killed and just return?
+				We could stop the STDOUT/STDERR output but wait for the stdin?
+*/
+
 package main
 
 import (
@@ -22,7 +27,6 @@ type Client struct {
 
 func main() {
 	app := fiber.New()
-	log.Println(getPublicDirPath())
 	app.Static("/", getPublicDirPath())
 	app.Get("/ws", websocket.New(handleWebSocketConnection))
 	app.Listen(":3000")
@@ -61,6 +65,7 @@ func handleWebSocketConnection(c *websocket.Conn) {
 		case "kill-process":
 			if client.cmd != nil {
 				client.cmd.Process.Kill()
+				client.cmd.Process.Release()
 			}
 		}
 	}
@@ -73,7 +78,14 @@ func getRandomUUID() string {
 }
 
 func compileAndRun(client *Client, code string) {
-	client.cmd = exec.Command("python", "-u", "-c", code)
+
+	filePath := client.id + ".odin"
+	if err := os.WriteFile(filePath, []byte(code), 0644); err != nil {
+		log.Println("Error writing to "+filePath+":", err.Error())
+		return
+	}
+
+	client.cmd = exec.Command("odin", "run", filePath, "-file")
 	stdinPipe, _ := client.cmd.StdinPipe()
 	client.stdinWriter = stdinPipe
 	stdoutPipe, _ := client.cmd.StdoutPipe()

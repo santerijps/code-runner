@@ -1,0 +1,8 @@
+root = "."
+
+[build]
+  cmd = "go build ."
+  bin = "./code-runner.exe"
+  delay = 200
+  exclude_dir = ["public", "tmp", "node_modules", ".git"]
+  include_ext = ["go"]
